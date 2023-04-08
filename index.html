@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake</title>
+</head>
+<body>
+
+    <canvas id="canvas" width="480" height="480"></canvas>
+    
+    <script>
+
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let rows = 20;
+        let cols = 20;
+        let snake = [
+        {
+            x: 19,
+            y: 3
+            }
+        ];
+
+        let food;
+
+        let cellWidth = canvas.width / cols;
+        let cellHeight = canvas.height / rows;
+        let direction =  'LEFT';
+
+        let foodCollected = false;
+
+        placeFood();
+
+        setInterval(gameLoop, 200); //Geschwindigkeit der Bewegung
+
+        document.addEventListener('keydown', keyDown);
+
+        draw();
+
+        function draw(){
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'pink';
+
+            snake.forEach(part => add(part.x, part.y)); //Schlange
+
+            ctx.fillStyle = 'beige ';
+            add(food.x, food.y); // Food
+
+            requestAnimationFrame(draw); //Die Draw-Funktion wird wieder aufgerufen
+
+        }
+
+        function testGameOver(){
+            let firstPart = snake[0]; //Schlangenkopf
+            let otherParts = snake.slice(1); //ohne Schlangenteil namens 0 (den Kopf)
+            let duplicatePart = otherParts.find(part => part.x == firstPart.x && part.y == firstPart.y);
+
+            if(snake[0].x < 0 ||
+               snake[0].x > cols - 1 ||
+               snake[0].y < 0 ||
+               snake[0].y > rows - 1 ||
+               duplicatePart) {
+                placeFood();
+                snake = [{
+                    x: 19,
+                    y: 3
+                }];
+                direction =  'LEFT';
+               }
+        }
+
+        function add(x, y){
+
+            ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth - 1, cellHeight - 1);
+
+        }
+
+        function shiftSnake(){
+
+            for (let i = snake.length - 1; i > 0; i--) { //erray = snake, part = einzelnen Teile der Schlange
+                const part = snake[i];                   // i ist dasselbe wie die Länge der Schlange (zB. 4 Blöcke) und ziehen einen ab, (den Schlangenkopf), dann wird überprüft ob i größer als Null ist, wenn ja (3) wird das in den Klammern {} ausgeführt. Dann wird i um eins verringert (i--) (2). Die Funktion wird wieder ausgeführt. (2 - 1 > 0 ? ...). Das wird ausgeführt, bis 0 drankommt.
+                const lastPart = snake[i - 1];           // Schlangenkopf
+                part.x = lastPart.x;
+                part.y = lastPart.y;
+            }
+
+        }
+
+        function gameLoop(){
+
+            testGameOver();
+
+            shiftSnake();
+
+            if(foodCollected) {
+                snake = [{x: snake[0].x, y: snake[0].y}, ...snake]; // Auf der linken Seite wird ein Glied hinzugefügt, solange foodCollect true ist
+                
+                foodCollected = false;
+                
+            }
+
+            if(direction == 'LEFT') {
+            snake[0].x--; //Von der Schlange, den 0. Teil/Part greife ich die x-Koordinate. -- = Veränderung der x-Koordinate von 2 zu 1 für Part 1 zB.
+            }
+
+            if(direction == 'RIGHT') {
+            snake[0].x++; 
+            }
+
+            if(direction == 'UP') {
+            snake[0].y--; 
+            }
+            
+            if(direction == 'DOWN') {
+            snake[0].y++; 
+            }
+
+            if(snake[0].x == food.x && snake[0].y == food.y){    // überprüft, ob y- und x-Koordinate des Schlangenkopfes mit dem des Essens dieselben sind
+                
+                foodCollected = true;
+                placeFood();
+
+            } 
+        }
+
+        function keyDown(e) {
+
+            if(e.keyCode == 37) {
+                direction = 'LEFT';
+            }
+
+            if(e.keyCode == 38) {
+                direction = 'UP';
+            }
+
+            if(e.keyCode == 39) {
+                direction = 'RIGHT';
+            }
+
+            if(e.keyCode == 40) {
+                direction = 'DOWN';
+            }
+
+        }
+
+        function placeFood(){
+
+            let randomX = Math.floor(Math.random() * cols); // eine Nummer soll generiert werden, die randomX heißt.
+            let randomY = Math.floor(Math.random() * rows);           // diese soll aber mit der cols / rows mutlipliziert werden 
+                                                            // (Die generierte Zahl ist von 0 bis 1) und dann gerundet
+            food = {x: randomX, y: randomY};                                               // werden, deshalb "Math.Floor" 
+
+        }
+
+    </script>
+
+</body>
+</html>
